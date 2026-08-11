@@ -1,0 +1,639 @@
+document.addEventListener('DOMContentLoaded', () => {
+
+    // --- NAVIGATION LOGIC ---
+    const navbar = document.getElementById('navbar');
+    const hero = document.getElementById('hero');
+    const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+    const mobileMenu = document.querySelector('.mobile-menu');
+    const mobileLinks = document.querySelectorAll('.mobile-link');
+
+    // Show nav only after scrolling past hero
+    const navObserverOptions = {
+        root: null,
+        threshold: 0,
+        rootMargin: "-100px 0px 0px 0px"
+    };
+
+    const navObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (!entry.isIntersecting) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+    }, navObserverOptions);
+
+    if (hero) {
+        navObserver.observe(hero);
+    }
+
+    // Mobile Menu Toggle
+    mobileMenuBtn.addEventListener('click', () => {
+        mobileMenu.classList.toggle('active');
+    });
+
+    mobileLinks.forEach(link => {
+        link.addEventListener('click', () => {
+            mobileMenu.classList.remove('active');
+        });
+    });
+
+    // --- SCROLL REVEAL ANIMATIONS ---
+    const revealElements = document.querySelectorAll('.reveal');
+    revealElements.forEach(el => el.classList.add('js-reveal'));
+    const revealObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('active');
+                revealObserver.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.15 });
+
+    revealElements.forEach(el => revealObserver.observe(el));
+
+    // --- STAT COUNTERS ---
+    const stats = document.querySelectorAll('.stat-number');
+    let animatedStats = false;
+
+    const statsObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting && !animatedStats) {
+                animatedStats = true;
+                stats.forEach(stat => {
+                    const target = +stat.getAttribute('data-target');
+                    const duration = 2000;
+                    const step = target / (duration / 16); // 60fps
+                    let current = 0;
+
+                    const updateCounter = () => {
+                        current += step;
+                        if (current < target) {
+                            stat.innerText = Math.ceil(current);
+                            requestAnimationFrame(updateCounter);
+                        } else {
+                            stat.innerText = target;
+                        }
+                    };
+                    updateCounter();
+                });
+            }
+        });
+    }, { threshold: 0.5 });
+
+    const statsSection = document.getElementById('impact');
+    if (statsSection) {
+        statsObserver.observe(statsSection);
+    }
+
+    // --- MODAL LOGIC ---
+    const modals = document.querySelectorAll('.modal');
+    const modalTriggers = document.querySelectorAll('.modal-trigger');
+    const modalCloses = document.querySelectorAll('.modal-close:not(.gallery-close)');
+    const contactForms = document.querySelectorAll('.contact-form');
+
+    const openModal = (modalId) => {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden'; // Prevent scrolling
+        }
+    };
+
+    const closeModal = (modal) => {
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+    };
+
+    modalTriggers.forEach(trigger => {
+        trigger.addEventListener('click', (e) => {
+            e.preventDefault();
+            const targetId = trigger.getAttribute('data-target');
+            openModal(targetId);
+        });
+    });
+
+    modalCloses.forEach(btn => {
+        btn.addEventListener('click', () => {
+            closeModal(btn.closest('.modal'));
+        });
+    });
+
+    modals.forEach(modal => {
+        modal.addEventListener('click', (e) => {
+            if (e.target.classList.contains('modal-overlay')) {
+                closeModal(modal);
+            }
+        });
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            modals.forEach(modal => {
+                if (modal.classList.contains('active')) {
+                    closeModal(modal);
+                }
+            });
+        }
+    });
+
+    contactForms.forEach(form => {
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const btn = form.querySelector('button[type="submit"]');
+            const originalText = btn.innerText;
+            btn.innerText = "Sending...";
+            btn.disabled = true;
+
+            // TODO: Replace this URL with your deployed Google Apps Script Web App URL
+            const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxNIjNnJSyGKGMLjTs8IvBTYym0qJKTDxTpPEl842uWBlQY_nlMecFsjFqFYfBLp15p/exec";
+
+            // Gather form data to match the Google Sheet column names
+            const formData = new URLSearchParams();
+            formData.append('Name', form.querySelector('[id$="name"]').value);
+            formData.append('Business', form.querySelector('[id$="business"]').value);
+            formData.append('Phone', '+91 ' + form.querySelector('[id$="phone"]').value);
+            formData.append('City', form.querySelector('[id$="city"]').value);
+            formData.append('Type', form.querySelector('[id$="type"]').value);
+            formData.append('Rooms', form.querySelector('[id$="rooms"]').value);
+            formData.append('Message', form.querySelector('[id$="message"]').value);
+
+            // If the URL hasn't been set yet, just mock the success so the UI doesn't break
+            if (GOOGLE_SCRIPT_URL === "YOUR_GOOGLE_SCRIPT_URL_HERE") {
+                console.warn("Please add your Google Script URL to script.js to actually send the data.");
+                simulateSuccess(btn, originalText, form);
+                return;
+            }
+
+            fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors', // Essential for Google Apps Script
+                body: formData
+            })
+                .then(() => {
+                    simulateSuccess(btn, originalText, form);
+                })
+                .catch(error => {
+                    console.error('Error!', error.message);
+                    btn.innerText = "Error - Try Again";
+                    btn.style.backgroundColor = "#d32f2f";
+                    btn.style.borderColor = "#d32f2f";
+                    btn.style.color = "#fff";
+
+                    setTimeout(() => {
+                        btn.innerText = originalText;
+                        btn.style = "";
+                        btn.disabled = false;
+                    }, 3000);
+                });
+
+            function simulateSuccess(button, origText, currentForm) {
+                button.innerText = "Request Sent Successfully";
+                button.style.backgroundColor = "#2e7d32";
+                button.style.borderColor = "#2e7d32";
+                button.style.color = "#fff";
+
+                setTimeout(() => {
+                    const modal = currentForm.closest('.modal');
+                    if (modal) {
+                        closeModal(modal);
+                    }
+                    currentForm.reset();
+                    button.innerText = origText;
+                    button.style = "";
+                    button.disabled = false;
+
+                    if (typeof appendUnselectsToGallery === 'function') {
+                        appendUnselectsToGallery();
+                    }
+                }, 2000);
+            }
+        });
+    });
+
+    // --- GALLERY LOGIC ---
+    // galleryData is now loaded globally from galleryData.js
+
+    const galleryGrid = document.getElementById('gallery-grid');
+    const tabBtns = document.querySelectorAll('.tab-btn');
+
+    // Popup Elements
+    const galleryPopup = document.getElementById('gallery-popup');
+    const popupTabs = document.querySelectorAll('.popup-tab-btn');
+    const mainPopupImg = document.getElementById('main-popup-img');
+    const thumbStrip = document.getElementById('thumbnail-strip');
+    const currentCount = document.getElementById('gallery-current');
+    const totalCount = document.getElementById('gallery-total');
+    const btnPrev = document.querySelector('.gallery-nav.prev');
+    const btnNext = document.querySelector('.gallery-nav.next');
+    const btnClosePopup = document.querySelector('.gallery-close');
+
+    let currentCategory = 'hotels';
+    let currentIndex = 0;
+
+    // Render Preview Grid
+    const renderPreview = (category) => {
+        if (!galleryGrid) return;
+        const images = galleryData[category];
+        galleryGrid.innerHTML = '';
+
+        // Show 8 images in a varied grid layout
+        const previewCount = Math.min(8, images.length);
+        const previewImages = images.slice(0, previewCount);
+
+        // Define which items span 2 cols for visual variety
+        const spanPattern = [true, false, false, false, false, true, false, false]; // items 0 and 5 span 2 cols
+
+        previewImages.forEach((src, index) => {
+            const div = document.createElement('div');
+            div.className = 'gallery-item';
+            if (spanPattern[index]) div.classList.add('span-2');
+
+            const img = document.createElement('img');
+            img.src = src.thumb;
+            img.alt = `Portfolio ${index + 1}`;
+            img.loading = index > 3 ? 'lazy' : 'eager';
+            div.appendChild(img);
+
+            // Add overlay to last item if more images exist
+            if (index === previewCount - 1 && images.length > previewCount) {
+                const remaining = images.length - previewCount;
+                const overlay = document.createElement('div');
+                overlay.className = 'more-overlay';
+                overlay.innerText = `+${remaining} More`;
+                div.appendChild(overlay);
+            }
+
+            div.addEventListener('click', () => openGalleryPopup(category, index));
+            galleryGrid.appendChild(div);
+        });
+    };
+
+    // Tab clicks for preview
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            tabBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            const cat = btn.getAttribute('data-category');
+            renderPreview(cat);
+        });
+    });
+
+    // Initialize preview
+    renderPreview('hotels');
+
+    // View Full Portfolio button
+    const viewAllBtn = document.getElementById('view-all-gallery');
+    if (viewAllBtn) {
+        viewAllBtn.addEventListener('click', () => {
+            const activeTab = document.querySelector('.tab-btn.active');
+            const cat = activeTab ? activeTab.getAttribute('data-category') : 'hotels';
+            openGalleryPopup(cat, 0);
+        });
+    }
+
+    // --- FULLSCREEN POPUP LOGIC ---
+    const renderPopupThumbnails = (category) => {
+        const images = galleryData[category];
+        thumbStrip.innerHTML = '';
+
+        images.forEach((src, index) => {
+            const div = document.createElement('div');
+            div.className = 'thumb-item';
+            if (index === currentIndex) div.classList.add('active');
+
+            const img = document.createElement('img');
+            img.src = src.thumb;
+            img.loading = "lazy";
+            div.appendChild(img);
+
+            div.addEventListener('click', () => {
+                setPopupImage(index);
+            });
+
+            thumbStrip.appendChild(div);
+        });
+    };
+
+    const setPopupImage = (index) => {
+        const images = galleryData[currentCategory];
+        if (index < 0) index = images.length - 1;
+        if (index >= images.length) index = 0;
+
+        currentIndex = index;
+        mainPopupImg.src = images[currentIndex].full;
+        currentCount.innerText = currentIndex + 1;
+        totalCount.innerText = images.length;
+
+        // Update active thumbnail
+        const thumbs = thumbStrip.querySelectorAll('.thumb-item');
+        thumbs.forEach(t => t.classList.remove('active'));
+        if (thumbs[currentIndex]) {
+            thumbs[currentIndex].classList.add('active');
+            // Scroll thumbnail into view
+            thumbs[currentIndex].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        }
+    };
+
+    const openGalleryPopup = (category, index = 0) => {
+        currentCategory = category;
+        currentIndex = index;
+
+        // Sync popup tabs
+        popupTabs.forEach(btn => {
+            if (btn.getAttribute('data-category') === category) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+
+        renderPopupThumbnails(category);
+        setPopupImage(index);
+
+        galleryPopup.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    };
+
+    // Popup Tab Clicks
+    popupTabs.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const cat = btn.getAttribute('data-category');
+            if (cat !== currentCategory) {
+                currentCategory = cat;
+                popupTabs.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                renderPopupThumbnails(cat);
+                setPopupImage(0);
+            }
+        });
+    });
+
+    // Navigation
+    btnPrev.addEventListener('click', () => setPopupImage(currentIndex - 1));
+    btnNext.addEventListener('click', () => setPopupImage(currentIndex + 1));
+
+    // Close Popup
+    btnClosePopup.addEventListener('click', () => closeModal(galleryPopup));
+
+    // Keyboard support
+    document.addEventListener('keydown', (e) => {
+        if (!galleryPopup.classList.contains('active')) return;
+        if (e.key === 'ArrowLeft') setPopupImage(currentIndex - 1);
+        if (e.key === 'ArrowRight') setPopupImage(currentIndex + 1);
+    });
+
+    // Swipe support for mobile
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    const mainDisplay = document.querySelector('.gallery-main-display');
+    if (mainDisplay) {
+        mainDisplay.addEventListener('touchstart', e => {
+            touchStartX = e.changedTouches[0].screenX;
+        }, { passive: true });
+
+        mainDisplay.addEventListener('touchend', e => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        }, { passive: true });
+    }
+
+    function handleSwipe() {
+        const threshold = 50;
+        if (touchEndX < touchStartX - threshold) {
+            setPopupImage(currentIndex + 1); // Swipe left -> next
+        }
+        if (touchEndX > touchStartX + threshold) {
+            setPopupImage(currentIndex - 1); // Swipe right -> prev
+        }
+    }
+
+    // --- V2 GALLERY LOGIC ---
+    const allGalleryImages = [...galleryData.hotels, ...galleryData.commercial];
+
+    // 1. Render Preview Collage
+    const previewCollage = document.getElementById('preview-collage');
+    if (previewCollage) {
+        // Just take top 3 images for the collage
+        const topImages = allGalleryImages.slice(0, 3);
+        topImages.forEach((src) => {
+            const img = document.createElement('img');
+            img.src = src.thumb;
+            img.className = 'collage-item';
+            img.loading = 'lazy';
+            previewCollage.appendChild(img);
+        });
+    }
+
+    // 1.5 Render Moving Background Collage
+    const movingBgContainer = document.getElementById('moving-bg-container');
+    if (movingBgContainer) {
+        // Shuffle all images once
+        const shuffled = [...allGalleryImages].sort(() => 0.5 - Math.random());
+        const itemsPerRow = Math.floor(shuffled.length / 3);
+        
+        // Create 3 rows
+        for (let i = 0; i < 3; i++) {
+            const row = document.createElement('div');
+            row.className = 'moving-bg-row' + (i % 2 !== 0 ? ' reverse' : '');
+            
+            // Assign a unique slice of images for this row
+            const rowImages = shuffled.slice(i * itemsPerRow, (i + 1) * itemsPerRow);
+            
+            // Duplicate ONLY ONCE to ensure seamless infinite scroll (standard marquee technique)
+            const trackImages = [...rowImages, ...rowImages];
+            
+            trackImages.forEach(src => {
+                if (src && src.thumb) {
+                    const img = document.createElement('img');
+                    img.src = src.thumb;
+                    img.loading = 'lazy';
+                    row.appendChild(img);
+                }
+            });
+            movingBgContainer.appendChild(row);
+        }
+    }
+
+    // 2. Render Masonry Grid
+    const masonryGrid = document.getElementById('masonry-grid');
+    if (masonryGrid) {
+        // Determine number of columns based on window width to mimic media queries
+        let numCols = 3;
+        if (window.innerWidth < 600) numCols = 1;
+        else if (window.innerWidth < 900) numCols = 2;
+
+        const cols = [];
+        for (let i = 0; i < numCols; i++) {
+            const col = document.createElement('div');
+            col.className = 'masonry-col';
+            cols.push(col);
+            masonryGrid.appendChild(col);
+        }
+
+        allGalleryImages.forEach((src, index) => {
+            const div = document.createElement('div');
+            div.className = 'masonry-item';
+            const img = document.createElement('img');
+            img.src = src.thumb;
+            img.loading = 'lazy';
+            div.appendChild(img);
+
+            div.addEventListener('click', () => {
+                openLightbox(index);
+            });
+
+            // Append to columns sequentially (left to right)
+            cols[index % numCols].appendChild(div);
+        });
+    }
+
+    // Unselects Append Logic
+    let unselectsAppended = false;
+    window.appendUnselectsToGallery = function () {
+        if (unselectsAppended || !galleryData.unselects || galleryData.unselects.length === 0) {
+            openModal('masonry-popup');
+            return;
+        }
+
+        unselectsAppended = true;
+        const masonryGrid = document.getElementById('masonry-grid');
+        if (!masonryGrid) return;
+
+        const cols = Array.from(masonryGrid.querySelectorAll('.masonry-col'));
+        if (cols.length === 0) return;
+
+        const numCols = cols.length;
+        const startIndex = allGalleryImages.length;
+
+        galleryData.unselects.forEach((src, idx) => {
+            const globalIndex = startIndex + idx;
+            allGalleryImages.push(src);
+
+            const div = document.createElement('div');
+            div.className = 'masonry-item revealed-new';
+            div.style.animationDelay = `${(idx % 12) * 0.08}s`;
+
+            const img = document.createElement('img');
+            img.src = src.thumb;
+            img.loading = 'lazy';
+
+            // Optional: highlight that it's unreleased
+            div.appendChild(img);
+
+            div.addEventListener('click', () => {
+                openLightbox(globalIndex);
+            });
+
+            cols[globalIndex % numCols].appendChild(div);
+        });
+
+        // Hide the access button now that they've unlocked it
+        const accessBtn = document.getElementById('access-full-portfolio');
+        if (accessBtn) {
+            accessBtn.style.display = 'none';
+        }
+
+        openModal('masonry-popup');
+
+        // Scroll slightly down to encourage continuing if they aren't already at the boundary
+        setTimeout(() => {
+            const scrollArea = document.querySelector('.masonry-scroll-area');
+            if (scrollArea) {
+                // Just scroll down a tiny bit for effect if we are already near the boundary
+                scrollArea.scrollBy({ top: 150, behavior: 'smooth' });
+            }
+        }, 100);
+    };
+
+    // 3. Masonry Modal Logic
+    const masonryPopup = document.getElementById('masonry-popup');
+    const openMasonryBtn = document.getElementById('open-masonry-btn');
+
+    if (openMasonryBtn) {
+        openMasonryBtn.addEventListener('click', (e) => {
+            e.stopPropagation(); // prevent double trigger
+            openModal('masonry-popup');
+        });
+
+        // Also allow clicking the wrapper itself to open
+        const collageWrapper = document.getElementById('preview-collage-wrapper');
+        if (collageWrapper) {
+            collageWrapper.addEventListener('click', () => {
+                openModal('masonry-popup');
+            });
+        }
+    }
+
+    // Access Full Portfolio Button
+    const accessFullPortfolioBtn = document.getElementById('access-full-portfolio');
+    if (accessFullPortfolioBtn) {
+        accessFullPortfolioBtn.addEventListener('click', () => {
+            openModal('access-modal');
+        });
+    }
+
+    // 4. Lightbox Modal Logic
+    const lightboxPopup = document.getElementById('lightbox-popup');
+    const lightboxImg = document.getElementById('lightbox-main-img');
+    const lbCurrent = document.getElementById('lightbox-current');
+    const lbTotal = document.getElementById('lightbox-total');
+    let lbIndex = 0;
+
+    const openLightbox = (index) => {
+        lbIndex = index;
+        updateLightbox();
+        openModal('lightbox-popup');
+    };
+
+    const updateLightbox = () => {
+        if (lbIndex < 0) lbIndex = allGalleryImages.length - 1;
+        if (lbIndex >= allGalleryImages.length) lbIndex = 0;
+
+        lightboxImg.src = allGalleryImages[lbIndex].full;
+        if (lbCurrent) lbCurrent.innerText = lbIndex + 1;
+        if (lbTotal) lbTotal.innerText = allGalleryImages.length;
+    };
+
+    const lbPrev = document.querySelector('.lightbox-nav.prev');
+    const lbNext = document.querySelector('.lightbox-nav.next');
+
+    if (lbPrev) lbPrev.addEventListener('click', () => { lbIndex--; updateLightbox(); });
+    if (lbNext) lbNext.addEventListener('click', () => { lbIndex++; updateLightbox(); });
+
+    if (lightboxPopup) {
+        // Close if clicking outside the actual image
+        lightboxPopup.addEventListener('click', (e) => {
+            if (e.target.classList.contains('lightbox-popup-content') ||
+                e.target.classList.contains('lightbox-main-display') ||
+                e.target.classList.contains('lightbox-image-container')) {
+                closeModal(lightboxPopup);
+            }
+        });
+    }
+
+    // Ensure keyboard navigation works for lightbox
+    document.addEventListener('keydown', (e) => {
+        if (lightboxPopup && lightboxPopup.classList.contains('active')) {
+            if (e.key === 'ArrowLeft') { lbIndex--; updateLightbox(); }
+            if (e.key === 'ArrowRight') { lbIndex++; updateLightbox(); }
+        }
+    });
+
+    // --- BEFORE/AFTER SLIDER (Hidden by default, but functional) ---
+    const baSlider = document.getElementById('ba-slider');
+    const baAfterImage = document.querySelector('.after-image');
+    const baSliderLine = document.querySelector('.slider-line');
+
+    if (baSlider && baAfterImage && baSliderLine) {
+        baSlider.addEventListener('input', (e) => {
+            const val = e.target.value;
+            baAfterImage.style.clipPath = `polygon(${val}% 0, 100% 0, 100% 100%, ${val}% 100%)`;
+            baSliderLine.style.left = `${val}%`;
+        });
+    }
+
+});
