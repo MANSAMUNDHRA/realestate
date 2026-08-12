@@ -327,6 +327,13 @@ document.addEventListener('DOMContentLoaded', () => {
         currentCount.innerText = currentIndex + 1;
         totalCount.innerText = images.length;
 
+        // Preload next image in background for instant Next click
+        const nextIdx = (currentIndex + 1) % images.length;
+        if (images[nextIdx] && images[nextIdx].full) {
+            const imgPreload = new Image();
+            imgPreload.src = images[nextIdx].full;
+        }
+
         // Update active thumbnail
         const thumbs = thumbStrip.querySelectorAll('.thumb-item');
         thumbs.forEach(t => t.classList.remove('active'));
@@ -596,13 +603,20 @@ document.addEventListener('DOMContentLoaded', () => {
         lightboxImg.src = allGalleryImages[lbIndex].full;
         if (lbCurrent) lbCurrent.innerText = lbIndex + 1;
         if (lbTotal) lbTotal.innerText = allGalleryImages.length;
+
+        // Preload next image in background for instant Next click
+        const nextLbIdx = (lbIndex + 1) % allGalleryImages.length;
+        if (allGalleryImages[nextLbIdx] && allGalleryImages[nextLbIdx].full) {
+            const imgLbPreload = new Image();
+            imgLbPreload.src = allGalleryImages[nextLbIdx].full;
+        }
     };
 
     const lbPrev = document.querySelector('.lightbox-nav.prev');
     const lbNext = document.querySelector('.lightbox-nav.next');
 
-    if (lbPrev) lbPrev.addEventListener('click', () => { lbIndex--; updateLightbox(); });
-    if (lbNext) lbNext.addEventListener('click', () => { lbIndex++; updateLightbox(); });
+    if (lbPrev) lbPrev.addEventListener('click', (e) => { e.stopPropagation(); lbIndex--; updateLightbox(); });
+    if (lbNext) lbNext.addEventListener('click', (e) => { e.stopPropagation(); lbIndex++; updateLightbox(); });
 
     if (lightboxPopup) {
         // Close if clicking outside the actual image
@@ -613,6 +627,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 closeModal(lightboxPopup);
             }
         });
+
+        // Touch swipe support for lightbox on mobile
+        let lbTouchStartX = 0;
+        let lbTouchEndX = 0;
+        const lbMainDisplay = lightboxPopup.querySelector('.lightbox-main-display');
+        if (lbMainDisplay) {
+            lbMainDisplay.addEventListener('touchstart', e => {
+                lbTouchStartX = e.changedTouches[0].screenX;
+            }, { passive: true });
+
+            lbMainDisplay.addEventListener('touchend', e => {
+                lbTouchEndX = e.changedTouches[0].screenX;
+                const threshold = 40;
+                if (lbTouchEndX < lbTouchStartX - threshold) {
+                    lbIndex++; updateLightbox();
+                } else if (lbTouchEndX > lbTouchStartX + threshold) {
+                    lbIndex--; updateLightbox();
+                }
+            }, { passive: true });
+        }
     }
 
     // Ensure keyboard navigation works for lightbox
