@@ -138,77 +138,125 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // --- INQUIRY / CONTACT FORM EMAIL SYSTEM ---
+    const EMAIL_TARGET = "mansha.mundhra2005@gmail.com";
+
     contactForms.forEach(form => {
-        form.addEventListener('submit', (e) => {
+        form.addEventListener('submit', async (e) => {
             e.preventDefault();
 
             const btn = form.querySelector('button[type="submit"]');
-            const originalText = btn.innerText;
+            if (!btn) return;
+
+            const originalText = btn.getAttribute('data-original-text') || btn.innerText;
+            if (!btn.getAttribute('data-original-text')) {
+                btn.setAttribute('data-original-text', originalText);
+            }
+
+            // Remove/reset any existing feedback message
+            let feedback = form.querySelector('.form-feedback');
+            if (!feedback) {
+                feedback = document.createElement('div');
+                feedback.className = 'form-feedback';
+                form.appendChild(feedback);
+            }
+            feedback.style.display = 'none';
+            feedback.className = 'form-feedback';
+
+            // Gather all form field values
+            const nameEl = form.querySelector('[id$="name"]');
+            const businessEl = form.querySelector('[id$="business"]');
+            const phoneEl = form.querySelector('[id$="phone"]');
+            const cityEl = form.querySelector('[id$="city"]');
+            const typeEl = form.querySelector('[id$="type"]');
+            const roomsEl = form.querySelector('[id$="rooms"]');
+            const messageEl = form.querySelector('[id$="message"]');
+
+            const visitorName = nameEl ? nameEl.value.trim() : 'Website Visitor';
+            const visitorBusiness = businessEl ? businessEl.value.trim() : 'N/A';
+            const visitorPhone = phoneEl ? '+91 ' + phoneEl.value.trim() : 'N/A';
+            const visitorCity = cityEl ? cityEl.value.trim() : 'N/A';
+            const visitorType = typeEl ? (typeEl.options[typeEl.selectedIndex]?.text || typeEl.value) : 'N/A';
+            const visitorRooms = roomsEl ? roomsEl.value.trim() : 'N/A';
+            const visitorMessage = messageEl && messageEl.value.trim() ? messageEl.value.trim() : 'None provided';
+
+            // Indicate sending state
             btn.innerText = "Sending...";
             btn.disabled = true;
 
-            // TODO: Replace this URL with your deployed Google Apps Script Web App URL
-            const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxNIjNnJSyGKGMLjTs8IvBTYym0qJKTDxTpPEl842uWBlQY_nlMecFsjFqFYfBLp15p/exec";
+            const payload = {
+                "_subject": `New Website Inquiry — ${visitorName}`,
+                "_template": "table",
+                "_captcha": "false",
+                "Name": visitorName,
+                "Property / Business Name": visitorBusiness,
+                "Phone Number": visitorPhone,
+                "City / Location": visitorCity,
+                "Type of Space": visitorType,
+                "Approximate Number of Rooms/Spaces": visitorRooms,
+                "Brief Message": visitorMessage
+            };
 
-            // Gather form data to match the Google Sheet column names
-            const formData = new URLSearchParams();
-            formData.append('Name', form.querySelector('[id$="name"]').value);
-            formData.append('Business', form.querySelector('[id$="business"]').value);
-            formData.append('Phone', '+91 ' + form.querySelector('[id$="phone"]').value);
-            formData.append('City', form.querySelector('[id$="city"]').value);
-            formData.append('Type', form.querySelector('[id$="type"]').value);
-            formData.append('Rooms', form.querySelector('[id$="rooms"]').value);
-            formData.append('Message', form.querySelector('[id$="message"]').value);
+            try {
+                const response = await fetch(`https://formsubmit.co/ajax/${EMAIL_TARGET}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
 
-            // If the URL hasn't been set yet, just mock the success so the UI doesn't break
-            if (GOOGLE_SCRIPT_URL === "YOUR_GOOGLE_SCRIPT_URL_HERE") {
-                console.warn("Please add your Google Script URL to script.js to actually send the data.");
-                simulateSuccess(btn, originalText, form);
-                return;
-            }
+                const data = await response.json().catch(() => ({}));
 
-            fetch(GOOGLE_SCRIPT_URL, {
-                method: 'POST',
-                mode: 'no-cors', // Essential for Google Apps Script
-                body: formData
-            })
-                .then(() => {
-                    simulateSuccess(btn, originalText, form);
-                })
-                .catch(error => {
-                    console.error('Error!', error.message);
-                    btn.innerText = "Error - Try Again";
-                    btn.style.backgroundColor = "#d32f2f";
-                    btn.style.borderColor = "#d32f2f";
-                    btn.style.color = "#fff";
+                // Check for successful transmission or pending activation response
+                if (response.ok || data.success === "true" || data.success === true || (data.message && data.message.includes("Activation"))) {
+                    // SUCCESS
+                    btn.innerText = "Thank you! Your inquiry has been submitted successfully.";
+                    btn.style.backgroundColor = "#2e7d32";
+                    btn.style.borderColor = "#2e7d32";
+                    btn.style.color = "#ffffff";
+
+                    feedback.className = 'form-feedback success';
+                    feedback.innerText = "Thank you! Your inquiry has been submitted successfully.";
+                    feedback.style.display = 'block';
 
                     setTimeout(() => {
+                        const modal = form.closest('.modal');
+                        if (modal) {
+                            closeModal(modal);
+                        }
+                        form.reset();
                         btn.innerText = originalText;
                         btn.style = "";
                         btn.disabled = false;
-                    }, 3000);
-                });
+                        feedback.style.display = 'none';
 
-            function simulateSuccess(button, origText, currentForm) {
-                button.innerText = "Request Sent Successfully";
-                button.style.backgroundColor = "#2e7d32";
-                button.style.borderColor = "#2e7d32";
-                button.style.color = "#fff";
+                        if (typeof appendUnselectsToGallery === 'function') {
+                            appendUnselectsToGallery();
+                        }
+                    }, 2500);
+                } else {
+                    throw new Error(data.message || "Email delivery failed");
+                }
+            } catch (err) {
+                console.error("Submission error:", err);
+
+                // FAILURE
+                btn.innerText = "Something went wrong. Please try again.";
+                btn.style.backgroundColor = "#d32f2f";
+                btn.style.borderColor = "#d32f2f";
+                btn.style.color = "#ffffff";
+
+                feedback.className = 'form-feedback error';
+                feedback.innerText = "Something went wrong. Please try again.";
+                feedback.style.display = 'block';
 
                 setTimeout(() => {
-                    const modal = currentForm.closest('.modal');
-                    if (modal) {
-                        closeModal(modal);
-                    }
-                    currentForm.reset();
-                    button.innerText = origText;
-                    button.style = "";
-                    button.disabled = false;
-
-                    if (typeof appendUnselectsToGallery === 'function') {
-                        appendUnselectsToGallery();
-                    }
-                }, 2000);
+                    btn.innerText = originalText;
+                    btn.style = "";
+                    btn.disabled = false;
+                }, 3500);
             }
         });
     });
