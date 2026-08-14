@@ -280,9 +280,9 @@ h3 { font-size: 1.5rem; margin-bottom: 0.5rem; }
 
 .hero-ctas {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    align-items: center;
     gap: 1rem;
-    align-items: flex-start;
 }
 
 .hero-ctas .btn-primary {
@@ -297,13 +297,6 @@ h3 { font-size: 1.5rem; margin-bottom: 0.5rem; }
     background-color: #4da393; /* Slightly brighter on hover for pop */
     box-shadow: 0 12px 32px rgba(61, 129, 116, 0.6);
     transform: translateY(-2px);
-}
-
-@media (min-width: 480px) {
-    .hero-ctas {
-        flex-direction: row;
-        align-items: center;
-    }
 }
 
 .btn-outline-dark {
@@ -2211,6 +2204,24 @@ h3 { font-size: 1.5rem; margin-bottom: 0.5rem; }
 }
 
 @media (max-width: 480px) {
+    .saas-hero-container {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+
+    .hero-ctas {
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        gap: 0.625rem;
+    }
+
+    .hero-ctas .btn {
+        padding: 0.75rem 1rem;
+        font-size: 0.875rem;
+        white-space: nowrap;
+    }
+
     .nav-container {
         padding: 0.5rem 0.65rem;
         gap: 0.4rem;
