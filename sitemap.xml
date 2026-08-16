@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+  <url>
+    <loc>https://hotels.binnyhouse.in/</loc>
+    <lastmod>2026-08-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://hotels.binnyhouse.in/images3/0Selects/0Hotels/00Hero_39_Hotel_H031_L44_Bedroom_WoodPaneled_S8.5.webp</image:loc>
+      <image:title>Professional hotel photography - luxury bedroom interior</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://hotels.binnyhouse.in/Section2/Good Photos/1_Hotel_H031_L44_Bedroom_WoodPaneled_S8.5.webp</image:loc>
+      <image:title>Hotel room photography with professional lighting</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://hotels.binnyhouse.in/images3/0Selects/0Hotels/Hotel_H041_L47_Bedroom_GrandHeadboard_S9.0.webp</image:loc>
+      <image:title>Hotel bedroom architectural photography</image:title>
+    </image:image>
+  </url>
+</urlset>
