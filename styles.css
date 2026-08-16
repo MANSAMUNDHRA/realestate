@@ -1734,7 +1734,7 @@ h3 { font-size: 1.5rem; margin-bottom: 0.5rem; }
 .brands-marquee {
     display: flex;
     width: max-content;
-    animation: scroll-marquee 40s linear infinite;
+    animation: scroll-marquee 80s linear infinite;
     will-change: transform;
 }
 
@@ -1746,14 +1746,14 @@ h3 { font-size: 1.5rem; margin-bottom: 0.5rem; }
     display: flex;
     align-items: center;
     flex-shrink: 0;
-    gap: 4.5rem;
-    padding-right: 4.5rem; /* match gap */
+    gap: 7rem;
+    padding-right: 7rem; /* match gap */
 }
 
 .brands-track img {
-    height: 52px;
+    height: 72px;
     width: auto;
-    max-width: 170px;
+    max-width: 220px;
     object-fit: contain;
     flex-shrink: 0;
     mix-blend-mode: multiply;
@@ -1781,13 +1781,16 @@ h3 { font-size: 1.5rem; margin-bottom: 0.5rem; }
     .trusted-brands {
         padding: 2.5rem 0;
     }
+    .brands-marquee {
+        animation-duration: 60s;
+    }
     .brands-track {
-        gap: 3rem;
-        padding-right: 3rem;
+        gap: 4.5rem;
+        padding-right: 4.5rem;
     }
     .brands-track img {
-        height: 38px;
-        max-width: 130px;
+        height: 50px;
+        max-width: 150px;
     }
 }
 
