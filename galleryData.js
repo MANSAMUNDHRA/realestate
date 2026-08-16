@@ -1,16 +1,16 @@
 const galleryData = {
     "hotels": [
         {
-            "thumb": "images3/thumbnails/01Unselects/2/Hotel_H049_L47_Bedroom_YellowAccents_S6.5.webp",
-            "full": "images3/0Selects/0Hotels/0Hotel_H049_L47_Bedroom_YellowAccents_S6.5.webp"
+            "thumb": "images3/thumbnails/0Hotels/Hotel_H031_L44_Bedroom_WoodPaneled_S8.5.webp",
+            "full": "images3/0Selects/0Hotels/Hotel_H031_L44_Bedroom_WoodPaneled_S8.5.webp"
         },
         {
-            "thumb": "images3/thumbnails/01Unselects/3/Restaurant_H024_L30_Seating_Cozy_S6.5.webp",
-            "full": "images3/0Selects/0Hotels/0Restaurant_H024_L30_Seating_Cozy_S6.5.webp"
+            "thumb": "images3/thumbnails/0Hotels/Hotel_H035_L48_Bedroom_HeadboardTufted_S8.5.webp",
+            "full": "images3/0Selects/0Hotels/Hotel_H035_L48_Bedroom_HeadboardTufted_S8.5.webp"
         },
         {
-            "thumb": "images3/thumbnails/1Commercial Spaces/Restaurant_H070_L45_Dining_ArchedWindows_S8.7.webp",
-            "full": "images3/0Selects/0Hotels/0Restaurant_H070_L45_Dining_ArchedWindows_S8.7.webp"
+            "thumb": "images3/thumbnails/0Hotels/Hotel_H036_L42_Bedroom_DetailSwan_S8.5.webp",
+            "full": "images3/0Selects/0Hotels/Hotel_H036_L42_Bedroom_DetailSwan_S8.5.webp"
         },
         {
             "thumb": "images3/thumbnails/0Hotels/Hotel_H037_L50_Housekeeping_Ironing_S7.5.webp",
@@ -59,8 +59,8 @@ const galleryData = {
             "full": "images3/0Selects/1Commercial Spaces/Restaurant_H027_L23_Dining_PinkTree_S7.8.webp"
         },
         {
-            "thumb": "images3/0Selects/0Hotels/0Restaurant_H070_L45_Dining_ArchedWindows_S8.7.webp",
-            "full": "images3/0Selects/0Hotels/0Restaurant_H070_L45_Dining_ArchedWindows_S8.7.webp"
+            "thumb": "images3/thumbnails/1Commercial Spaces/Restaurant_H070_L45_Dining_ArchedWindows_S8.7.webp",
+            "full": "images3/0Selects/1Commercial Spaces/Restaurant_H070_L45_Dining_ArchedWindows_S8.7.webp"
         },
         {
             "thumb": "images3/thumbnails/1Commercial Spaces/Restaurant_H082_L41_Dining_TropicalVibe_S6.5.webp",
@@ -109,8 +109,8 @@ const galleryData = {
             "full": "images3/01Unselects/2/Hotel_H037_L41_Bedroom_TwinBedsGreen_S6.5.webp"
         },
         {
-            "thumb": "images3/0Selects/0Hotels/0Hotel_H049_L47_Bedroom_YellowAccents_S6.5.webp",
-            "full": "images3/0Selects/0Hotels/0Hotel_H049_L47_Bedroom_YellowAccents_S6.5.webp"
+            "thumb": "images3/thumbnails/01Unselects/2/Hotel_H049_L47_Bedroom_YellowAccents_S6.5.webp",
+            "full": "images3/01Unselects/2/Hotel_H049_L47_Bedroom_YellowAccents_S6.5.webp"
         },
         {
             "thumb": "images3/thumbnails/01Unselects/2/Hotel_H054_L46_Bedroom_TwinBedsYellow_S6.5.webp",
@@ -149,8 +149,8 @@ const galleryData = {
             "full": "images3/01Unselects/3/Restaurant_H009_L40_Dining_RedLanterns_S6.5.webp"
         },
         {
-            "thumb": "images3/0Selects/0Hotels/0Restaurant_H024_L30_Seating_Cozy_S6.5.webp",
-            "full": "images3/0Selects/0Hotels/0Restaurant_H024_L30_Seating_Cozy_S6.5.webp"
+            "thumb": "images3/thumbnails/01Unselects/3/Restaurant_H024_L30_Seating_Cozy_S6.5.webp",
+            "full": "images3/01Unselects/3/Restaurant_H024_L30_Seating_Cozy_S6.5.webp"
         },
         {
             "thumb": "images3/thumbnails/01Unselects/3/Restaurant_H033_L22_DiningArea_RedLanterns_S6.5.webp",

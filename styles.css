@@ -1716,22 +1716,26 @@ h3 { font-size: 1.5rem; margin-bottom: 0.5rem; }
 /* TRUSTED BY BRANDS */
 .trusted-brands {
     background-color: #D5CFC4; /* Darker taupe */
-    padding: 3rem 0;
+    padding: 3.5rem 0;
+    overflow: hidden;
 }
 
 .brands-marquee-container {
     width: 100%;
     overflow: hidden;
     position: relative;
+    display: flex;
+    justify-content: center;
     /* create a fade effect on edges */
-    -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
-    mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+    mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
 }
 
 .brands-marquee {
     display: flex;
     width: max-content;
     animation: scroll-marquee 40s linear infinite;
+    will-change: transform;
 }
 
 .brands-marquee:hover {
@@ -1741,24 +1745,27 @@ h3 { font-size: 1.5rem; margin-bottom: 0.5rem; }
 .brands-track {
     display: flex;
     align-items: center;
-    gap: 6.8rem;
-    padding-right: 6.8rem; /* match gap */
+    flex-shrink: 0;
+    gap: 4.5rem;
+    padding-right: 4.5rem; /* match gap */
 }
 
 .brands-track img {
-    height: 60px;
+    height: 52px;
     width: auto;
-    max-width: 180px;
+    max-width: 170px;
     object-fit: contain;
+    flex-shrink: 0;
     mix-blend-mode: multiply;
     /* Warm monochromatic tint to match ivory/cream theme */
     filter: grayscale(100%) sepia(20%) hue-rotate(350deg) contrast(1.1) opacity(0.7);
-    transition: filter 0.4s ease, opacity 0.4s ease;
+    transition: filter 0.4s ease, opacity 0.4s ease, transform 0.3s ease;
 }
 
 .brands-track img:hover {
     /* Reveal original brand colors on hover */
     filter: grayscale(0%) sepia(0%) opacity(1);
+    transform: scale(1.05);
 }
 
 @keyframes scroll-marquee {
@@ -1767,6 +1774,20 @@ h3 { font-size: 1.5rem; margin-bottom: 0.5rem; }
     }
     to {
         transform: translateX(-50%);
+    }
+}
+
+@media (max-width: 768px) {
+    .trusted-brands {
+        padding: 2.5rem 0;
+    }
+    .brands-track {
+        gap: 3rem;
+        padding-right: 3rem;
+    }
+    .brands-track img {
+        height: 38px;
+        max-width: 130px;
     }
 }
 
