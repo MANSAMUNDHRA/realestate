@@ -1,0 +1,10 @@
+# graft's local graph cache — regenerable, not committed (run `graft build`).
+graft/
+
+# Exclude high-resolution JPG source files from deployment
+# These are 492 MB of originals that the site never references
+images3/**/*.jpg
+Section2/**/*.jpg
+Section2/**/*.png
+Logos for Website/*.png
+*.jpeg

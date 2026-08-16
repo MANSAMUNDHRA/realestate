@@ -139,7 +139,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // --- INQUIRY / CONTACT FORM EMAIL SYSTEM ---
-    const EMAIL_TARGET = "mansha.mundhra2005@gmail.com";
+    const EMAIL_TARGET = ["mailbinnyhouse", "gmail.com"].join("@");
 
     contactForms.forEach(form => {
         form.addEventListener('submit', async (e) => {
