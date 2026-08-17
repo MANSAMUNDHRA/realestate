@@ -53,6 +53,11 @@ function createContactForm(formId) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    function trackEvent(eventName, eventParams = {}) {
+        if (typeof window.gtag === 'function') {
+            window.gtag('event', eventName, eventParams);
+        }
+    }
 
     function generateAltText(src) {
         try {
@@ -179,7 +184,12 @@ const focusedElementStack = [];
                 focusedElementStack.push(document.activeElement);
             }
             modal.classList.add('active');
-            document.body.style.overflow = 'hidden'; // Prevent scrolling
+            document.body.style.overflow = 'hidden';
+            if (modalId === 'contact-modal') {
+                trackEvent('click_cta_quote');
+            } else if (modalId === 'masonry-popup') {
+                trackEvent('view_portfolio_gallery');
+            } // Prevent scrolling
             
             // Focus first focusable element
             const focusable = modal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
@@ -300,6 +310,11 @@ const focusedElementStack = [];
                 // Check for successful transmission or pending activation response
                 if (response.ok || data.success === "true" || data.success === true || (data.message && data.message.includes("Activation"))) {
                     // SUCCESS
+                    trackEvent('generate_lead', {
+                        form_id: form.id || 'contact-form',
+                        property_type: visitorType || 'unspecified',
+                        city: visitorCity || 'unspecified'
+                    });
                     btn.innerText = "Thank you! Your inquiry has been submitted successfully.";
                     btn.style.backgroundColor = "#2e7d32";
                     btn.style.borderColor = "#2e7d32";
@@ -613,6 +628,11 @@ const focusedElementStack = [];
 
     function openLightbox(index) {
         lbIndex = index;
+        if (allGalleryImages[index]) {
+            trackEvent('view_photo_detail', {
+                photo: allGalleryImages[index].full
+            });
+        }
         updateLightbox();
         openModal('lightbox-popup');
     }
