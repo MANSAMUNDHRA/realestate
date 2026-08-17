@@ -1,4 +1,81 @@
+
+function createContactForm(formId) {
+    const isAccess = formId === 'access-quote-form';
+    const isInline = formId === 'inline-quote-form';
+    const prefix = isAccess ? 'access-' : (isInline ? 'inline-' : '');
+    
+    return `
+        <div class="form-group">
+            <label for="${prefix}name">Name</label>
+            <input type="text" id="${prefix}name" required>
+        </div>
+        <div class="form-group">
+            <label for="${prefix}business">Property / Business Name</label>
+            <input type="text" id="${prefix}business" required>
+        </div>
+        <div class="form-group">
+            <label for="${prefix}phone">Phone Number</label>
+            <div class="phone-input-wrapper">
+                <span class="phone-prefix">+91</span>
+                <input type="tel" id="${prefix}phone" class="phone-input" placeholder="10-digit number" pattern="[0-9]{10}"
+                    title="Please enter exactly 10 digits" minlength="10" maxlength="10" required>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="${prefix}city">City / Location</label>
+            <input type="text" id="${prefix}city" required>
+        </div>
+        <div class="form-group">
+            <label for="${prefix}type">Type of Space</label>
+            <select id="${prefix}type" required>
+                <option value="" disabled selected>Select an option</option>
+                <option value="hotel">Hotel/Resort</option>
+                <option value="restaurant">Restaurant/Cafe</option>
+                <option value="office">Office Space</option>
+                <option value="other">Other</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="${prefix}rooms">Approximate number of rooms/spaces</label>
+            <input type="number" id="${prefix}rooms" min="1"
+                title="Please enter a valid number of rooms (1 or more)" required>
+        </div>
+        <div class="form-group">
+            <label for="${prefix}message">Brief message (optional)</label>
+            <textarea id="${prefix}message" rows="3"></textarea>
+        </div>
+        <div class="form-group checkbox-group">
+            <input type="checkbox" id="${prefix}consent" required>
+            <label for="${prefix}consent">I agree to be contacted regarding my inquiry</label>
+        </div>
+        <button type="submit" class="btn btn-primary full-width">Send Inquiry</button>
+    `;
+}
+
 document.addEventListener('DOMContentLoaded', () => {
+
+    function generateAltText(src) {
+        try {
+            const filename = src.split('/').pop().split('.')[0];
+            const parts = filename.split('_');
+            const keywords = parts.filter(p => !/^(\d|H\d|L\d|S\d)/.test(p));
+            const formatted = keywords.map(k => k.replace(/([a-z])([A-Z])/g, '$1 $2')).join(' ');
+            return formatted ? `${formatted} - Professional Photography by Binny House` : 'Professional Hotel & Architectural Photography by Binny House';
+        } catch (e) {
+            return 'Professional Hotel & Architectural Photography by Binny House';
+        }
+    }
+
+
+    const inlineForm = document.getElementById('inline-quote-form');
+    if (inlineForm) inlineForm.innerHTML = createContactForm('inline-quote-form');
+    
+    const quoteForm = document.getElementById('quote-form');
+    if (quoteForm) quoteForm.innerHTML = createContactForm('quote-form');
+    
+    const accessForm = document.getElementById('access-quote-form');
+    if (accessForm) accessForm.innerHTML = createContactForm('access-quote-form');
+
 
     // --- NAVIGATION LOGIC ---
     const navbar = document.getElementById('navbar');
@@ -93,17 +170,36 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalCloses = document.querySelectorAll('.modal-close:not(.gallery-close)');
     const contactForms = document.querySelectorAll('.contact-form');
 
+const focusedElementStack = [];
+
     const openModal = (modalId) => {
         const modal = document.getElementById(modalId);
         if (modal) {
+            if (document.activeElement) {
+                focusedElementStack.push(document.activeElement);
+            }
             modal.classList.add('active');
             document.body.style.overflow = 'hidden'; // Prevent scrolling
+            
+            // Focus first focusable element
+            const focusable = modal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+            if (focusable.length) {
+                setTimeout(() => focusable[0].focus(), 50);
+            }
         }
     };
 
     const closeModal = (modal) => {
+        if (!modal) return;
         modal.classList.remove('active');
-        document.body.style.overflow = '';
+        const remainingActive = document.querySelectorAll('.modal.active');
+        if (remainingActive.length === 0) {
+            document.body.style.overflow = '';
+        }
+        const prevFocused = focusedElementStack.pop();
+        if (prevFocused && typeof prevFocused.focus === 'function') {
+            try { prevFocused.focus(); } catch (err) {}
+        }
     };
 
     modalTriggers.forEach(trigger => {
@@ -128,15 +224,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-            modals.forEach(modal => {
-                if (modal.classList.contains('active')) {
-                    closeModal(modal);
-                }
-            });
-        }
-    });
+
 
     // --- INQUIRY / CONTACT FORM EMAIL SYSTEM ---
     const EMAIL_TARGET = ["mailbinnyhouse", "gmail.com"].join("@");
@@ -467,18 +555,24 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- V2 GALLERY LOGIC ---
-    const allGalleryImages = [...galleryData.hotels, ...galleryData.commercial];
+    const allGalleryImages = [
+        ...(galleryData.hotels || []),
+        ...(galleryData.commercial || [])
+    ];
+    const initialImagesCount = allGalleryImages.length;
+    let unselectsAppended = false;
 
     // 1. Render Preview Collage
     const previewCollage = document.getElementById('preview-collage');
     if (previewCollage) {
-        // Just take top 3 images for the collage
+        previewCollage.innerHTML = '';
         const topImages = allGalleryImages.slice(0, 3);
         topImages.forEach((src) => {
             const img = document.createElement('img');
             img.src = src.thumb;
             img.className = 'collage-item';
             img.loading = 'lazy';
+            img.alt = generateAltText(src.thumb);
             previewCollage.appendChild(img);
         });
     }
@@ -486,19 +580,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // 1.5 Render Moving Background Collage
     const movingBgContainer = document.getElementById('moving-bg-container');
     if (movingBgContainer) {
-        // Shuffle all images once
+        movingBgContainer.innerHTML = '';
         const shuffled = [...allGalleryImages].sort(() => 0.5 - Math.random());
-        const itemsPerRow = Math.floor(shuffled.length / 3);
+        const itemsPerRow = Math.max(1, Math.floor(shuffled.length / 3));
         
-        // Create 3 rows
         for (let i = 0; i < 3; i++) {
             const row = document.createElement('div');
             row.className = 'moving-bg-row' + (i % 2 !== 0 ? ' reverse' : '');
             
-            // Assign a unique slice of images for this row
             const rowImages = shuffled.slice(i * itemsPerRow, (i + 1) * itemsPerRow);
-            
-            // Duplicate ONLY ONCE to ensure seamless infinite scroll (standard marquee technique)
             const trackImages = [...rowImages, ...rowImages];
             
             trackImages.forEach(src => {
@@ -506,129 +596,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     const img = document.createElement('img');
                     img.src = src.thumb;
                     img.loading = 'lazy';
+                    img.alt = generateAltText(src.thumb);
                     row.appendChild(img);
                 }
             });
             movingBgContainer.appendChild(row);
         }
-    }
-
-    // 2. Render Masonry Grid
-    const masonryGrid = document.getElementById('masonry-grid');
-    if (masonryGrid) {
-        // Determine number of columns based on window width to mimic media queries
-        let numCols = 3;
-        if (window.innerWidth < 600) numCols = 1;
-        else if (window.innerWidth < 900) numCols = 2;
-
-        const cols = [];
-        for (let i = 0; i < numCols; i++) {
-            const col = document.createElement('div');
-            col.className = 'masonry-col';
-            cols.push(col);
-            masonryGrid.appendChild(col);
-        }
-
-        allGalleryImages.forEach((src, index) => {
-            const div = document.createElement('div');
-            div.className = 'masonry-item';
-            const img = document.createElement('img');
-            img.src = src.thumb;
-            img.loading = 'lazy';
-            div.appendChild(img);
-
-            div.addEventListener('click', () => {
-                openLightbox(index);
-            });
-
-            // Append to columns sequentially (left to right)
-            cols[index % numCols].appendChild(div);
-        });
-    }
-
-    // Unselects Append Logic
-    let unselectsAppended = false;
-    window.appendUnselectsToGallery = function () {
-        if (unselectsAppended || !galleryData.unselects || galleryData.unselects.length === 0) {
-            openModal('masonry-popup');
-            return;
-        }
-
-        unselectsAppended = true;
-        const masonryGrid = document.getElementById('masonry-grid');
-        if (!masonryGrid) return;
-
-        const cols = Array.from(masonryGrid.querySelectorAll('.masonry-col'));
-        if (cols.length === 0) return;
-
-        const numCols = cols.length;
-        const startIndex = allGalleryImages.length;
-
-        galleryData.unselects.forEach((src, idx) => {
-            const globalIndex = startIndex + idx;
-            allGalleryImages.push(src);
-
-            const div = document.createElement('div');
-            div.className = 'masonry-item revealed-new';
-            div.style.animationDelay = `${(idx % 12) * 0.08}s`;
-
-            const img = document.createElement('img');
-            img.src = src.thumb;
-            img.loading = 'lazy';
-
-            // Optional: highlight that it's unreleased
-            div.appendChild(img);
-
-            div.addEventListener('click', () => {
-                openLightbox(globalIndex);
-            });
-
-            cols[globalIndex % numCols].appendChild(div);
-        });
-
-        // Hide the access button now that they've unlocked it
-        const accessBtn = document.getElementById('access-full-portfolio');
-        if (accessBtn) {
-            accessBtn.style.display = 'none';
-        }
-
-        openModal('masonry-popup');
-
-        // Scroll slightly down to encourage continuing if they aren't already at the boundary
-        setTimeout(() => {
-            const scrollArea = document.querySelector('.masonry-scroll-area');
-            if (scrollArea) {
-                // Just scroll down a tiny bit for effect if we are already near the boundary
-                scrollArea.scrollBy({ top: 150, behavior: 'smooth' });
-            }
-        }, 100);
-    };
-
-    // 3. Masonry Modal Logic
-    const masonryPopup = document.getElementById('masonry-popup');
-    const openMasonryBtn = document.getElementById('open-masonry-btn');
-
-    if (openMasonryBtn) {
-        openMasonryBtn.addEventListener('click', (e) => {
-            e.stopPropagation(); // prevent double trigger
-            openModal('masonry-popup');
-        });
-
-        // Also allow clicking the wrapper itself to open
-        const collageWrapper = document.getElementById('preview-collage-wrapper');
-        if (collageWrapper) {
-            collageWrapper.addEventListener('click', () => {
-                openModal('masonry-popup');
-            });
-        }
-    }
-
-    // Access Full Portfolio Button
-    const accessFullPortfolioBtn = document.getElementById('access-full-portfolio');
-    if (accessFullPortfolioBtn) {
-        accessFullPortfolioBtn.addEventListener('click', () => {
-            openModal('access-modal');
-        });
     }
 
     // 4. Lightbox Modal Logic
@@ -638,27 +611,29 @@ document.addEventListener('DOMContentLoaded', () => {
     const lbTotal = document.getElementById('lightbox-total');
     let lbIndex = 0;
 
-    const openLightbox = (index) => {
+    function openLightbox(index) {
         lbIndex = index;
         updateLightbox();
         openModal('lightbox-popup');
-    };
+    }
 
-    const updateLightbox = () => {
+    function updateLightbox() {
+        if (!lightboxImg || allGalleryImages.length === 0) return;
         if (lbIndex < 0) lbIndex = allGalleryImages.length - 1;
         if (lbIndex >= allGalleryImages.length) lbIndex = 0;
 
         lightboxImg.src = allGalleryImages[lbIndex].full;
+        lightboxImg.alt = generateAltText(allGalleryImages[lbIndex].full);
         if (lbCurrent) lbCurrent.innerText = lbIndex + 1;
         if (lbTotal) lbTotal.innerText = allGalleryImages.length;
 
-        // Preload next image in background for instant Next click
+        // Preload next image
         const nextLbIdx = (lbIndex + 1) % allGalleryImages.length;
         if (allGalleryImages[nextLbIdx] && allGalleryImages[nextLbIdx].full) {
             const imgLbPreload = new Image();
             imgLbPreload.src = allGalleryImages[nextLbIdx].full;
         }
-    };
+    }
 
     const lbPrev = document.querySelector('.lightbox-nav.prev');
     const lbNext = document.querySelector('.lightbox-nav.next');
@@ -667,7 +642,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (lbNext) lbNext.addEventListener('click', (e) => { e.stopPropagation(); lbIndex++; updateLightbox(); });
 
     if (lightboxPopup) {
-        // Close if clicking outside the actual image
         lightboxPopup.addEventListener('click', (e) => {
             if (e.target.classList.contains('lightbox-popup-content') ||
                 e.target.classList.contains('lightbox-main-display') ||
@@ -676,7 +650,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // Touch swipe support for lightbox on mobile
         let lbTouchStartX = 0;
         let lbTouchEndX = 0;
         const lbMainDisplay = lightboxPopup.querySelector('.lightbox-main-display');
@@ -697,8 +670,156 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Ensure keyboard navigation works for lightbox
+    // 2. Render Masonry Grid
+    function buildMasonryGrid(forceRebuild = false) {
+        const masonryGrid = document.getElementById('masonry-grid');
+        if (!masonryGrid) return;
+        
+        let numCols = 3;
+        if (window.innerWidth < 600) numCols = 1;
+        else if (window.innerWidth < 900) numCols = 2;
+        
+        const currentCols = masonryGrid.querySelectorAll('.masonry-col');
+        if (!forceRebuild && currentCols.length === numCols && currentCols.length > 0) return;
+        
+        masonryGrid.innerHTML = '';
+        const cols = [];
+        for (let i = 0; i < numCols; i++) {
+            const col = document.createElement('div');
+            col.className = 'masonry-col';
+            cols.push(col);
+            masonryGrid.appendChild(col);
+        }
+
+        allGalleryImages.forEach((src, index) => {
+            const div = document.createElement('div');
+            div.className = 'masonry-item';
+            if (unselectsAppended && index >= initialImagesCount) {
+                div.classList.add('revealed-new');
+            }
+            const img = document.createElement('img');
+            img.src = src.thumb;
+            img.loading = 'lazy';
+            img.alt = generateAltText(src.thumb);
+            div.appendChild(img);
+
+            div.addEventListener('click', () => {
+                openLightbox(index);
+            });
+            cols[index % numCols].appendChild(div);
+        });
+    }
+
+    buildMasonryGrid();
+    
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+            buildMasonryGrid();
+        }, 250);
+    });
+
+    // Unselects Append Logic
+    window.appendUnselectsToGallery = function () {
+        if (unselectsAppended || !galleryData.unselects || galleryData.unselects.length === 0) {
+            openModal('masonry-popup');
+            return;
+        }
+
+        unselectsAppended = true;
+        galleryData.unselects.forEach((src) => {
+            allGalleryImages.push(src);
+        });
+        
+        buildMasonryGrid(true);
+        
+        const newItems = document.querySelectorAll('.revealed-new');
+        newItems.forEach((item, idx) => {
+            item.style.animationDelay = `${(idx % 12) * 0.08}s`;
+        });
+
+        const accessBtn = document.getElementById('access-full-portfolio');
+        if (accessBtn) {
+            accessBtn.style.display = 'none';
+        }
+
+        openModal('masonry-popup');
+
+        setTimeout(() => {
+            const scrollArea = document.querySelector('.masonry-scroll-area');
+            if (scrollArea) {
+                scrollArea.scrollBy({ top: 150, behavior: 'smooth' });
+            }
+        }, 100);
+    };
+
+    // 3. Masonry Modal Trigger Logic
+    const openMasonryBtn = document.getElementById('open-masonry-btn');
+    if (openMasonryBtn) {
+        openMasonryBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            openModal('masonry-popup');
+        });
+    }
+
+    const collageWrapper = document.getElementById('preview-collage-wrapper');
+    if (collageWrapper) {
+        collageWrapper.addEventListener('click', () => {
+            openModal('masonry-popup');
+        });
+    }
+
+    // Access Full Portfolio Button
+    const accessFullPortfolioBtn = document.getElementById('access-full-portfolio');
+    if (accessFullPortfolioBtn) {
+        accessFullPortfolioBtn.addEventListener('click', () => {
+            openModal('access-modal');
+        });
+    }
+    
+
+
+    // Ensure keyboard navigation works for modals and lightbox
     document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            const lightbox = document.getElementById('lightbox-popup');
+            const accessModal = document.getElementById('access-modal');
+            const contactModal = document.getElementById('contact-modal');
+            const masonry = document.getElementById('masonry-popup');
+
+            if (lightbox && lightbox.classList.contains('active')) {
+                closeModal(lightbox);
+            } else if (accessModal && accessModal.classList.contains('active')) {
+                closeModal(accessModal);
+            } else if (contactModal && contactModal.classList.contains('active')) {
+                closeModal(contactModal);
+            } else if (masonry && masonry.classList.contains('active')) {
+                closeModal(masonry);
+            } else {
+                const activeModals = document.querySelectorAll('.modal.active');
+                if (activeModals.length > 0) {
+                    closeModal(activeModals[activeModals.length - 1]);
+                }
+            }
+        }
+        if (e.key === 'Tab') {
+            const activeModal = Array.from(modals).find(m => m.classList.contains('active'));
+            if (activeModal) {
+                const focusable = activeModal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+                if (focusable.length) {
+                    const first = focusable[0];
+                    const last = focusable[focusable.length - 1];
+                    if (e.shiftKey && document.activeElement === first) {
+                        e.preventDefault();
+                        last.focus();
+                    } else if (!e.shiftKey && document.activeElement === last) {
+                        e.preventDefault();
+                        first.focus();
+                    }
+                }
+            }
+        }
         if (lightboxPopup && lightboxPopup.classList.contains('active')) {
             if (e.key === 'ArrowLeft') { lbIndex--; updateLightbox(); }
             if (e.key === 'ArrowRight') { lbIndex++; updateLightbox(); }

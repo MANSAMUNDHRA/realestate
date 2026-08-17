@@ -1794,39 +1794,7 @@ h3 { font-size: 1.5rem; margin-bottom: 0.5rem; }
     }
 }
 
-.preview-collage-overlay {
-    position: absolute;
-    left: 0;
-
-    width: 100%;
-
-    height: 100%;
-
-    background: rgba(0, 0, 0, 0.4);
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    opacity: 0;
-
-    transition: opacity var(--transition-smooth);
-
-    backdrop-filter: blur(2px);
-
-    z-index: 2;
-
-}
-
-
-
-.preview-collage-wrapper:hover .preview-collage-overlay {
-
-    opacity: 1;
-
-}
+/* Removed duplicate overlay block */
 
 
 
@@ -1922,28 +1890,25 @@ h3 { font-size: 1.5rem; margin-bottom: 0.5rem; }
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.4);
+    background: rgba(0, 0, 0, 0.2);
     display: flex;
     align-items: center;
     justify-content: center;
-    opacity: 0;
-    transition: opacity var(--transition-smooth);
+    opacity: 1;
+    transition: background-color var(--transition-smooth);
     backdrop-filter: blur(2px);
     z-index: 2;
 }
 
 .preview-collage-wrapper:hover .preview-collage-overlay {
-    opacity: 1;
+    background: rgba(0, 0, 0, 0.5);
 }
 
 .preview-collage-overlay .btn {
-    transform: translateY(20px);
-    transition: transform var(--transition-smooth), background-color 0.3s, color 0.3s;
+    transition: background-color 0.3s, color 0.3s;
 }
 
-.preview-collage-wrapper:hover .preview-collage-overlay .btn {
-    transform: translateY(0);
-}
+
 
 /* MASONRY POPUP (85% Viewport) */
 .masonry-modal .masonry-popup-content {
@@ -2337,3 +2302,20 @@ h3 { font-size: 1.5rem; margin-bottom: 0.5rem; }
 
 
 
+
+/* Extracted Inline Styles */
+.phone-input-wrapper { display: flex; }
+.phone-prefix { background-color: var(--bg-cream); border: 1px solid var(--border-color); border-right: none; padding: 0.75rem 1rem; border-radius: 4px 0 0 4px; color: var(--accent-grey); display: flex; align-items: center; justify-content: center; font-weight: 500; }
+.phone-input { border-radius: 0 4px 4px 0; }
+.inline-contact-wrapper { max-width: 600px; margin: 0 auto; background: var(--white); padding: 2.5rem; border-radius: 12px; box-shadow: var(--shadow-sm); border: 1px solid var(--border-color); }
+.inline-contact-heading { font-size: clamp(2.5rem, 5vw, 3.5rem); margin-bottom: 0.5rem; color: var(--text-dark); }
+.inline-contact-sub { margin-top: 1rem; color: var(--accent-grey); }
+
+.gallery-v2-container { position: relative; overflow: hidden; padding: 6rem 0; }
+.gallery-v2-content { position: relative; z-index: 1; }
+.text-white { color: white; }
+.mb-2-5 { margin-bottom: 2.5rem; }
+.mb-2 { margin-bottom: 2rem; }
+.my-3-2 { margin-top: 3rem; margin-bottom: 2rem; }
+.text-primary-color { color: var(--primary-color); }
+.text-light-grey { color: #ebe8e8; }

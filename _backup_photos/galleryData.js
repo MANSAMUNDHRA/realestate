@@ -1,8 +1,8 @@
 const galleryData = {
     "hotels": [
         {
-            "thumb": "images3/thumbnails/0Hotels/00Hero_39_Hotel_H031_L44_Bedroom_WoodPaneled_S8.5.webp",
-            "full": "images3/0Selects/0Hotels/00Hero_39_Hotel_H031_L44_Bedroom_WoodPaneled_S8.5.webp"
+            "thumb": "images3/thumbnails/0Hotels/Hotel_H031_L44_Bedroom_WoodPaneled_S8.5.webp",
+            "full": "images3/0Selects/0Hotels/Hotel_H031_L44_Bedroom_WoodPaneled_S8.5.webp"
         },
         {
             "thumb": "images3/thumbnails/0Hotels/Hotel_H035_L48_Bedroom_HeadboardTufted_S8.5.webp",
@@ -77,14 +77,6 @@ const galleryData = {
         {
             "thumb": "images3/thumbnails/1Commercial Spaces/Salon_H040_L60_Reception_HighCeiling_S8.5.webp",
             "full": "images3/0Selects/1Commercial Spaces/Salon_H040_L60_Reception_HighCeiling_S8.5.webp"
-        },
-        {
-            "thumb": "images3/thumbnails/1Commercial Spaces/Cafe_H018_L29_Seating_YellowChairs_S6.0.webp",
-            "full": "images3/0Selects/1Commercial Spaces/Cafe_H018_L29_Seating_YellowChairs_S6.0.webp"
-        },
-        {
-            "thumb": "images3/thumbnails/1Commercial Spaces/Salon_H038_L56_StylingStation_RoundMirrors_S8.2.webp",
-            "full": "images3/0Selects/1Commercial Spaces/Salon_H038_L56_StylingStation_RoundMirrors_S8.2.webp"
         }
     ],
     "unselects": [
@@ -131,6 +123,10 @@ const galleryData = {
         {
             "thumb": "images3/thumbnails/01Unselects/3/Bar_H138_L25_Counter_TurquoiseChairs_S6.5.webp",
             "full": "images3/01Unselects/3/Bar_H138_L25_Counter_TurquoiseChairs_S6.5.webp"
+        },
+        {
+            "thumb": "images3/thumbnails/01Unselects/3/Cafe_H018_L29_Seating_YellowChairs_S6.0.webp",
+            "full": "images3/01Unselects/3/Cafe_H018_L29_Seating_YellowChairs_S6.0.webp"
         },
         {
             "thumb": "images3/thumbnails/01Unselects/3/Cafe_H031_L21_Pano_WideView_S6.0.webp",

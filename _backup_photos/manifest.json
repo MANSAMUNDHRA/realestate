@@ -1,0 +1,20 @@
+{
+  "backups": [
+    {
+      "original": "images3\\0Selects\\0Hotels\\Hotel_H040_L29_Bathroom_VanityMirror_S8.0.webp",
+      "backup": "_backup_photos\\Hotel_H040_L29_Bathroom_VanityMirror_S8.0.webp"
+    },
+    {
+      "original": "images3\\thumbnails\\0Hotels\\Hotel_H040_L29_Bathroom_VanityMirror_S8.0.webp",
+      "backup": "_backup_photos\\Hotel_H040_L29_Bathroom_VanityMirror_S8.0.webp"
+    },
+    {
+      "original": "images3\\0Selects\\1Commercial Spaces\\Restaurant_H027_L23_Dining_PinkTree_S7.8.webp",
+      "backup": "_backup_photos\\Restaurant_H027_L23_Dining_PinkTree_S7.8.webp"
+    },
+    {
+      "original": "images3\\thumbnails\\1Commercial Spaces\\Restaurant_H027_L23_Dining_PinkTree_S7.8.webp",
+      "backup": "_backup_photos\\Restaurant_H027_L23_Dining_PinkTree_S7.8.webp"
+    }
+  ]
+}
