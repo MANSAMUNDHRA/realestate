@@ -1734,16 +1734,37 @@ h3 { font-size: 1.5rem; margin-bottom: 0.5rem; }
     position: relative;
     display: flex;
     justify-content: center;
-    /* create a fade effect on edges */
-    -webkit-mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
-    mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+}
+
+.brands-marquee-container::before,
+.brands-marquee-container::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 90px;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.brands-marquee-container::before {
+    left: 0;
+    background: linear-gradient(to right, #D5CFC4 10%, rgba(213, 207, 196, 0) 100%);
+}
+
+.brands-marquee-container::after {
+    right: 0;
+    background: linear-gradient(to left, #D5CFC4 10%, rgba(213, 207, 196, 0) 100%);
 }
 
 .brands-marquee {
     display: flex;
     width: max-content;
-    animation: scroll-marquee 80s linear infinite;
+    animation: scroll-marquee 70s linear infinite;
     will-change: transform;
+    transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
+    perspective: 1000px;
 }
 
 .brands-marquee:hover {
@@ -1754,8 +1775,8 @@ h3 { font-size: 1.5rem; margin-bottom: 0.5rem; }
     display: flex;
     align-items: center;
     flex-shrink: 0;
-    gap: 7rem;
-    padding-right: 7rem; /* match gap */
+    gap: 6rem;
+    padding-right: 6rem; /* match gap */
 }
 
 .brands-track img {
@@ -1765,23 +1786,25 @@ h3 { font-size: 1.5rem; margin-bottom: 0.5rem; }
     object-fit: contain;
     flex-shrink: 0;
     mix-blend-mode: multiply;
-    /* Warm monochromatic tint to match ivory/cream theme */
-    filter: grayscale(100%) sepia(20%) hue-rotate(350deg) contrast(1.1) opacity(0.7);
-    transition: filter 0.4s ease, opacity 0.4s ease, transform 0.3s ease;
+    /* Clean, high-contrast monochrome with 20% boost */
+    filter: grayscale(100%) contrast(1.3);
+    opacity: 0.88;
+    transition: filter 0.3s ease, opacity 0.3s ease, transform 0.3s ease;
 }
 
 .brands-track img:hover {
     /* Reveal original brand colors on hover */
-    filter: grayscale(0%) sepia(0%) opacity(1);
+    filter: grayscale(0%) contrast(1);
+    opacity: 1;
     transform: scale(1.05);
 }
 
 @keyframes scroll-marquee {
-    from {
-        transform: translateX(0);
+    0% {
+        transform: translate3d(0, 0, 0);
     }
-    to {
-        transform: translateX(-50%);
+    100% {
+        transform: translate3d(-50%, 0, 0);
     }
 }
 
@@ -1789,16 +1812,20 @@ h3 { font-size: 1.5rem; margin-bottom: 0.5rem; }
     .trusted-brands {
         padding: 2.5rem 0;
     }
+    .brands-marquee-container::before,
+    .brands-marquee-container::after {
+        width: 45px;
+    }
     .brands-marquee {
-        animation-duration: 60s;
+        animation-duration: 50s;
     }
     .brands-track {
-        gap: 4.5rem;
-        padding-right: 4.5rem;
+        gap: 4rem;
+        padding-right: 4rem;
     }
     .brands-track img {
-        height: 50px;
-        max-width: 150px;
+        height: 48px;
+        max-width: 140px;
     }
 }
 
