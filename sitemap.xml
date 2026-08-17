@@ -8,15 +8,91 @@
     <priority>1.0</priority>
     <image:image>
       <image:loc>https://hotels.binnyhouse.in/images3/0Selects/0Hotels/00Hero_39_Hotel_H031_L44_Bedroom_WoodPaneled_S8.5.webp</image:loc>
-      <image:title>Professional hotel photography - luxury bedroom interior</image:title>
+      <image:title>Professional hotel photography - luxury wood paneled bedroom interior</image:title>
     </image:image>
     <image:image>
-      <image:loc>https://hotels.binnyhouse.in/Section2/Good Photos/1_Hotel_H031_L44_Bedroom_WoodPaneled_S8.5.webp</image:loc>
-      <image:title>Hotel room photography with professional lighting</image:title>
+      <image:loc>https://hotels.binnyhouse.in/images3/0Selects/0Hotels/Hotel_H035_L48_Bedroom_HeadboardTufted_S8.5.webp</image:loc>
+      <image:title>Professional hotel bedroom photography - tufted headboard interior</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://hotels.binnyhouse.in/images3/0Selects/0Hotels/Hotel_H036_L42_Bedroom_DetailSwan_S8.5.webp</image:loc>
+      <image:title>Professional hotel photography - bedroom swan towel art detail</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://hotels.binnyhouse.in/images3/0Selects/0Hotels/Hotel_H037_L50_Housekeeping_Ironing_S7.5.webp</image:loc>
+      <image:title>Professional hotel photography - housekeeping and ironing service detail</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://hotels.binnyhouse.in/images3/0Selects/0Hotels/Hotel_H040_L29_Bathroom_VanityMirror_S8.0.webp</image:loc>
+      <image:title>Professional hotel bathroom photography - luxury vanity mirror</image:title>
     </image:image>
     <image:image>
       <image:loc>https://hotels.binnyhouse.in/images3/0Selects/0Hotels/Hotel_H041_L47_Bedroom_GrandHeadboard_S9.0.webp</image:loc>
-      <image:title>Hotel bedroom architectural photography</image:title>
+      <image:title>Hotel bedroom architectural photography - grand headboard suite</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://hotels.binnyhouse.in/images3/0Selects/0Hotels/Hotel_H045_L41_Lobby_ReceptionDesk_S8.5.webp</image:loc>
+      <image:title>Professional hotel lobby photography - luxury reception desk</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://hotels.binnyhouse.in/Section2/Good%20Photos/1_Hotel_H031_L44_Bedroom_WoodPaneled_S8.5.webp</image:loc>
+      <image:title>Hotel room photography with professional lighting</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://hotels.binnyhouse.in/images3/0Selects/1Commercial%20Spaces/Clinic_H032_L58_Reception_RingLights_S8.5.webp</image:loc>
+      <image:title>Professional commercial photography - modern clinic reception with ring lights</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://hotels.binnyhouse.in/images3/0Selects/1Commercial%20Spaces/Hotel_H198_L10_ExteriorNight_IlluminatedFacade_S8.8.webp</image:loc>
+      <image:title>Professional architectural photography - illuminated hotel exterior facade at night</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://hotels.binnyhouse.in/images3/0Selects/1Commercial%20Spaces/Lounge_H074_L29_Seating_BlueVelvet_S8.5.webp</image:loc>
+      <image:title>Commercial interior photography - luxury lounge seating with blue velvet</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://hotels.binnyhouse.in/images3/0Selects/1Commercial%20Spaces/Misc_H026_L16_Bar_Cocktails_S8.5.webp</image:loc>
+      <image:title>Commercial hospitality photography - bar counter with craft cocktails</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://hotels.binnyhouse.in/images3/0Selects/1Commercial%20Spaces/Misc_H035_L46_Restaurant_Food_S8.5.webp</image:loc>
+      <image:title>Restaurant commercial photography - gourmet food presentation and dining</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://hotels.binnyhouse.in/images3/0Selects/1Commercial%20Spaces/Office_H030_L47_Lounge_LeatherDesk_S7.9.webp</image:loc>
+      <image:title>Corporate office interior photography - executive lounge and leather desk</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://hotels.binnyhouse.in/images3/0Selects/1Commercial%20Spaces/Restaurant_H027_L23_Dining_PinkTree_S7.8.webp</image:loc>
+      <image:title>Restaurant interior photography - dining area with pink blossom tree</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://hotels.binnyhouse.in/images3/0Selects/1Commercial%20Spaces/Restaurant_H070_L45_Dining_ArchedWindows_S8.7.webp</image:loc>
+      <image:title>Fine dining restaurant photography - elegant dining space with arched windows</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://hotels.binnyhouse.in/images3/0Selects/1Commercial%20Spaces/Restaurant_H082_L41_Dining_TropicalVibe_S6.5.webp</image:loc>
+      <image:title>Restaurant interior photography - tropical vibe dining ambiance</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://hotels.binnyhouse.in/images3/0Selects/1Commercial%20Spaces/Restaurant_H082_L41_SeatingNiche_TropicalMural_S8.8.webp</image:loc>
+      <image:title>Restaurant commercial photography - seating niche with tropical wall mural</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://hotels.binnyhouse.in/images3/0Selects/1Commercial%20Spaces/Retail_H001_L24_LiquorDisplay_JamesonBarrel_S8.6.webp</image:loc>
+      <image:title>Commercial retail photography - liquor display with whiskey barrel</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://hotels.binnyhouse.in/images3/0Selects/1Commercial%20Spaces/Salon_H040_L60_Reception_HighCeiling_S8.5.webp</image:loc>
+      <image:title>Salon interior photography - luxury reception area with high ceiling</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://hotels.binnyhouse.in/images3/0Selects/1Commercial%20Spaces/Cafe_H018_L29_Seating_YellowChairs_S6.0.webp</image:loc>
+      <image:title>Cafe interior photography - cozy seating area with vibrant yellow chairs</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://hotels.binnyhouse.in/images3/0Selects/1Commercial%20Spaces/Salon_H038_L56_StylingStation_RoundMirrors_S8.2.webp</image:loc>
+      <image:title>Salon interior photography - styling station with round illuminated mirrors</image:title>
     </image:image>
   </url>
 </urlset>

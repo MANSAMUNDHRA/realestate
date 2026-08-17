@@ -1,0 +1,11 @@
+{
+  "name": "binnyhouse-hotels",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Binny House Hotel & Architectural Photography Website",
+  "scripts": {
+    "build": "npx clean-css-cli styles.css -o styles.min.css && npx terser script.js -o script.min.js -c -m",
+    "build:css": "npx clean-css-cli styles.css -o styles.min.css",
+    "build:js": "npx terser script.js -o script.min.js -c -m"
+  }
+}

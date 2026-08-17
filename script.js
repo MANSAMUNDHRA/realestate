@@ -404,7 +404,7 @@ const focusedElementStack = [];
 
             const img = document.createElement('img');
             img.src = src.thumb;
-            img.alt = `Portfolio ${index + 1}`;
+            img.alt = generateAltText(src.thumb);
             img.loading = index > 3 ? 'lazy' : 'eager';
             div.appendChild(img);
 
@@ -858,5 +858,58 @@ const focusedElementStack = [];
             baSliderLine.style.left = `${val}%`;
         });
     }
+
+    // --- WHATSAPP CLICK TRACKING ---
+    document.querySelectorAll('a[href*="wa.me"]').forEach(link => {
+        link.addEventListener('click', () => {
+            const source = link.closest('.footer') ? 'footer'
+                : link.closest('.modal') ? 'contact_modal'
+                : link.id === 'whatsapp-float' ? 'floating_button'
+                : 'unknown';
+            trackEvent('click_whatsapp', {
+                source: source,
+                link_url: link.href
+            });
+        });
+    });
+
+    // --- WHATSAPP FLOATING BUTTON VISIBILITY ---
+    const waFloat = document.getElementById('whatsapp-float');
+    if (waFloat && hero) {
+        const waObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (!entry.isIntersecting) {
+                    waFloat.classList.add('visible');
+                } else {
+                    waFloat.classList.remove('visible');
+                }
+            });
+        }, { threshold: 0 });
+        waObserver.observe(hero);
+    }
+
+    // --- SCROLL DEPTH TRACKING ---
+    const scrollMilestones = [25, 50, 75, 100];
+    const firedMilestones = new Set();
+    window.addEventListener('scroll', () => {
+        const scrollTop = window.scrollY || document.documentElement.scrollTop;
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        if (docHeight <= 0) return;
+        const scrollPercent = Math.round((scrollTop / docHeight) * 100);
+        scrollMilestones.forEach(milestone => {
+            if (scrollPercent >= milestone && !firedMilestones.has(milestone)) {
+                firedMilestones.add(milestone);
+                trackEvent('scroll_depth', { percent: milestone });
+            }
+        });
+    }, { passive: true });
+
+    // --- TIME ON PAGE TRACKING ---
+    const timeCheckpoints = [30, 60, 120];
+    timeCheckpoints.forEach(seconds => {
+        setTimeout(() => {
+            trackEvent('engaged_time', { seconds: seconds });
+        }, seconds * 1000);
+    });
 
 });
