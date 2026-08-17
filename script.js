@@ -54,8 +54,20 @@ function createContactForm(formId) {
 
 document.addEventListener('DOMContentLoaded', () => {
     function trackEvent(eventName, eventParams = {}) {
-        if (typeof window.gtag === 'function') {
-            window.gtag('event', eventName, eventParams);
+        try {
+            if (typeof window.gtag === 'function') {
+                window.gtag('event', eventName, eventParams);
+            }
+        } catch (e) {
+            // Defensive: tracking must never interrupt UI
+        }
+    }
+
+    function cleanPhotoName(src) {
+        try {
+            return src.split('/').pop().replace(/\.(webp|jpg|jpeg|png)$/i, '');
+        } catch (e) {
+            return 'photo';
         }
     }
 
@@ -199,8 +211,70 @@ const focusedElementStack = [];
         }
     };
 
+    // Track active forms for funnel & abandonment detection
+    const formInteractionMap = new Map();
+
+    contactForms.forEach(form => {
+        const formId = form.id || 'contact-form';
+        const formData = {
+            started: false,
+            submitted: false,
+            completedFields: new Set()
+        };
+        formInteractionMap.set(formId, formData);
+
+        form.addEventListener('focusin', () => {
+            if (!formData.started) {
+                formData.started = true;
+                trackEvent('form_start', { form_id: formId });
+            }
+        });
+
+        form.querySelectorAll('input, select, textarea').forEach(field => {
+            field.addEventListener('blur', () => {
+                const fieldName = field.id ? field.id.replace(/^(inline-|access-)/, '') : (field.name || 'field');
+                const val = field.value.trim();
+                if (val.length > 0 && !formData.completedFields.has(fieldName)) {
+                    formData.completedFields.add(fieldName);
+                    trackEvent('form_field_complete', {
+                        form_id: formId,
+                        field_name: fieldName,
+                        completed_count: formData.completedFields.size
+                    });
+                }
+            });
+        });
+    });
+
     const closeModal = (modal) => {
         if (!modal) return;
+
+        // Handle lightbox session closing telemetry
+        if (modal.id === 'lightbox-popup') {
+            flushPhotoDwell();
+            if (lbSessionStartTime > 0) {
+                const totalLightboxSec = Math.round((Date.now() - lbSessionStartTime) / 1000);
+                trackEvent('lightbox_close', {
+                    total_photos_viewed: lbTotalPhotosViewed,
+                    total_session_seconds: totalLightboxSec
+                });
+            }
+            lbSessionStartTime = 0;
+            lbTotalPhotosViewed = 0;
+        }
+
+        // Form abandonment check if modal has an unsubmitted started form
+        const formInModal = modal.querySelector('form');
+        if (formInModal && formInteractionMap.has(formInModal.id)) {
+            const fData = formInteractionMap.get(formInModal.id);
+            if (fData.started && !fData.submitted) {
+                trackEvent('form_abandon', {
+                    form_id: formInModal.id,
+                    fields_completed_count: fData.completedFields.size
+                });
+            }
+        }
+
         modal.classList.remove('active');
         const remainingActive = document.querySelectorAll('.modal.active');
         if (remainingActive.length === 0) {
@@ -310,10 +384,14 @@ const focusedElementStack = [];
                 // Check for successful transmission or pending activation response
                 if (response.ok || data.success === "true" || data.success === true || (data.message && data.message.includes("Activation"))) {
                     // SUCCESS
+                    if (formInteractionMap.has(form.id)) {
+                        formInteractionMap.get(form.id).submitted = true;
+                    }
                     trackEvent('generate_lead', {
                         form_id: form.id || 'contact-form',
                         property_type: visitorType || 'unspecified',
-                        city: visitorCity || 'unspecified'
+                        city: visitorCity || 'unspecified',
+                        rooms: visitorRooms || 'unspecified'
                     });
                     btn.innerText = "Thank you! Your inquiry has been submitted successfully.";
                     btn.style.backgroundColor = "#2e7d32";
@@ -519,6 +597,8 @@ const focusedElementStack = [];
     popupTabs.forEach(btn => {
         btn.addEventListener('click', () => {
             const cat = btn.getAttribute('data-category');
+            const tabName = btn.innerText.trim();
+            trackEvent('portfolio_category_tab', { category: tabName });
             if (cat !== currentCategory) {
                 currentCategory = cat;
                 popupTabs.forEach(b => b.classList.remove('active'));
@@ -619,18 +699,45 @@ const focusedElementStack = [];
         }
     }
 
-    // 4. Lightbox Modal Logic
+    // 4. Lightbox Modal Logic & Photo Dwell Telemetry
     const lightboxPopup = document.getElementById('lightbox-popup');
     const lightboxImg = document.getElementById('lightbox-main-img');
     const lbCurrent = document.getElementById('lightbox-current');
     const lbTotal = document.getElementById('lightbox-total');
     let lbIndex = 0;
+    let lbPhotoStartTime = 0;
+    let lbSessionStartTime = 0;
+    let lbTotalPhotosViewed = 0;
+
+    function flushPhotoDwell() {
+        try {
+            if (lbPhotoStartTime > 0 && allGalleryImages[lbIndex]) {
+                const dwellSec = Math.round((Date.now() - lbPhotoStartTime) / 1000);
+                if (dwellSec >= 1) {
+                    const photoObj = allGalleryImages[lbIndex];
+                    trackEvent('photo_dwell', {
+                        photo_name: cleanPhotoName(photoObj.full),
+                        photo_index: lbIndex + 1,
+                        dwell_seconds: dwellSec
+                    });
+                }
+            }
+        } catch (e) {}
+        lbPhotoStartTime = 0;
+    }
 
     function openLightbox(index) {
+        flushPhotoDwell();
         lbIndex = index;
+        lbSessionStartTime = Date.now();
+        lbTotalPhotosViewed = 1;
+        lbPhotoStartTime = Date.now();
+
         if (allGalleryImages[index]) {
             trackEvent('view_photo_detail', {
-                photo: allGalleryImages[index].full
+                photo_name: cleanPhotoName(allGalleryImages[index].full),
+                photo_index: index + 1,
+                total_photos: allGalleryImages.length
             });
         }
         updateLightbox();
@@ -655,11 +762,27 @@ const focusedElementStack = [];
         }
     }
 
+    function navigateLightbox(newIndex, navType = 'button_arrow') {
+        flushPhotoDwell();
+        lbIndex = newIndex;
+        lbTotalPhotosViewed++;
+        lbPhotoStartTime = Date.now();
+
+        if (allGalleryImages[lbIndex]) {
+            trackEvent('lightbox_nav', {
+                action: navType,
+                photo_name: cleanPhotoName(allGalleryImages[lbIndex].full),
+                photo_index: lbIndex + 1
+            });
+        }
+        updateLightbox();
+    }
+
     const lbPrev = document.querySelector('.lightbox-nav.prev');
     const lbNext = document.querySelector('.lightbox-nav.next');
 
-    if (lbPrev) lbPrev.addEventListener('click', (e) => { e.stopPropagation(); lbIndex--; updateLightbox(); });
-    if (lbNext) lbNext.addEventListener('click', (e) => { e.stopPropagation(); lbIndex++; updateLightbox(); });
+    if (lbPrev) lbPrev.addEventListener('click', (e) => { e.stopPropagation(); navigateLightbox(lbIndex - 1, 'prev_button'); });
+    if (lbNext) lbNext.addEventListener('click', (e) => { e.stopPropagation(); navigateLightbox(lbIndex + 1, 'next_button'); });
 
     if (lightboxPopup) {
         lightboxPopup.addEventListener('click', (e) => {
@@ -682,9 +805,9 @@ const focusedElementStack = [];
                 lbTouchEndX = e.changedTouches[0].screenX;
                 const threshold = 40;
                 if (lbTouchEndX < lbTouchStartX - threshold) {
-                    lbIndex++; updateLightbox();
+                    navigateLightbox(lbIndex + 1, 'touch_swipe');
                 } else if (lbTouchEndX > lbTouchStartX + threshold) {
-                    lbIndex--; updateLightbox();
+                    navigateLightbox(lbIndex - 1, 'touch_swipe');
                 }
             }, { passive: true });
         }
@@ -841,8 +964,8 @@ const focusedElementStack = [];
             }
         }
         if (lightboxPopup && lightboxPopup.classList.contains('active')) {
-            if (e.key === 'ArrowLeft') { lbIndex--; updateLightbox(); }
-            if (e.key === 'ArrowRight') { lbIndex++; updateLightbox(); }
+            if (e.key === 'ArrowLeft') { navigateLightbox(lbIndex - 1, 'keyboard_arrow'); }
+            if (e.key === 'ArrowRight') { navigateLightbox(lbIndex + 1, 'keyboard_arrow'); }
         }
     });
 
@@ -850,16 +973,25 @@ const focusedElementStack = [];
     const baSlider = document.getElementById('ba-slider');
     const baAfterImage = document.querySelector('.after-image');
     const baSliderLine = document.querySelector('.slider-line');
+    let sliderInteracted = false;
 
     if (baSlider && baAfterImage && baSliderLine) {
         baSlider.addEventListener('input', (e) => {
             const val = e.target.value;
             baAfterImage.style.clipPath = `polygon(${val}% 0, 100% 0, 100% 100%, ${val}% 100%)`;
             baSliderLine.style.left = `${val}%`;
+
+            if (!sliderInteracted) {
+                sliderInteracted = true;
+                trackEvent('slider_interaction', {
+                    component: 'ota_comparison_slider',
+                    value: val
+                });
+            }
         });
     }
 
-    // --- WHATSAPP CLICK TRACKING ---
+    // --- WHATSAPP & PHONE TELEMETRY ---
     document.querySelectorAll('a[href*="wa.me"]').forEach(link => {
         link.addEventListener('click', () => {
             const source = link.closest('.footer') ? 'footer'
@@ -873,7 +1005,145 @@ const focusedElementStack = [];
         });
     });
 
-    // --- WHATSAPP FLOATING BUTTON VISIBILITY (Past Hero Only) ---
+    document.querySelectorAll('a[href^="tel:"]').forEach(link => {
+        link.addEventListener('click', () => {
+            trackEvent('click_phone_call', {
+                phone_number: link.href.replace('tel:', '')
+            });
+        });
+    });
+
+    // --- GLOBAL BUTTON & CTA TELEMETRY ---
+    document.addEventListener('click', (e) => {
+        try {
+            const target = e.target.closest('a, button, .btn, .modal-trigger, .whatsapp-btn, #whatsapp-float, .popup-tab-btn');
+            if (!target) return;
+
+            const text = (target.innerText || target.getAttribute('aria-label') || target.title || '').trim().replace(/\s+/g, ' ');
+            const id = target.id || '';
+            const cls = typeof target.className === 'string' ? target.className : '';
+            const parentSection = target.closest('section, header, footer, .modal');
+            const sectionId = parentSection ? (parentSection.id || parentSection.className.split(' ')[0]) : 'page';
+
+            let ctaType = 'button_click';
+            let destination = '';
+
+            if (target.getAttribute('data-target')) {
+                ctaType = 'modal_open_trigger';
+                destination = target.getAttribute('data-target');
+            } else if (target.href && target.href.includes('wa.me')) {
+                ctaType = 'whatsapp_click';
+                destination = target.href;
+            } else if (target.href && target.href.startsWith('tel:')) {
+                ctaType = 'phone_call_click';
+                destination = target.href;
+            } else if (target.classList.contains('popup-tab-btn')) {
+                ctaType = 'category_tab_switch';
+                destination = text;
+            } else if (target.getAttribute('type') === 'submit') {
+                ctaType = 'form_submit_button';
+            }
+
+            trackEvent('cta_click', {
+                button_text: text.slice(0, 50),
+                button_id: id,
+                button_class: cls.slice(0, 50),
+                section_id: sectionId,
+                cta_type: ctaType,
+                destination: destination.slice(0, 100)
+            });
+        } catch (err) {}
+    }, { passive: true });
+
+    // --- SECTION DWELL TIME TELEMETRY ---
+    const sectionIds = ['hero', 'problem', 'impact', 'portfolio-v2', 'why-us', 'process', 'trusted', 'investment', 'inline-contact'];
+    const sectionTimers = {};
+    const viewedSections = new Set();
+
+    function formatSectionTitle(id) {
+        const map = {
+            'hero': 'Hero & Value Prop',
+            'problem': 'OTA Photo Comparison',
+            'impact': 'Revenue & Booking Impact',
+            'portfolio-v2': 'See the Work Gallery',
+            'why-us': 'Why Binny House Advantages',
+            'process': 'Step-by-Step Process',
+            'trusted': 'Trusted Brands Marquee',
+            'investment': 'Pricing & ROI Package',
+            'inline-contact': 'Inline Quote Form'
+        };
+        return map[id] || id;
+    }
+
+    function flushSectionDwell(id) {
+        try {
+            if (!sectionTimers[id] || !sectionTimers[id].start) return;
+            const dwellMs = Date.now() - sectionTimers[id].start;
+            sectionTimers[id].total = (sectionTimers[id].total || 0) + dwellMs;
+            sectionTimers[id].start = null;
+
+            const dwellSeconds = Math.round(dwellMs / 1000);
+            if (dwellSeconds >= 2) {
+                trackEvent('section_dwell', {
+                    section_id: id,
+                    section_name: formatSectionTitle(id),
+                    dwell_seconds: dwellSeconds
+                });
+            }
+        } catch (e) {}
+    }
+
+    const sectionObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            const id = entry.target.id;
+            if (!id) return;
+            if (entry.isIntersecting) {
+                if (!viewedSections.has(id)) {
+                    viewedSections.add(id);
+                    trackEvent('section_view', {
+                        section_id: id,
+                        section_name: formatSectionTitle(id)
+                    });
+                }
+                if (document.visibilityState === 'visible') {
+                    sectionTimers[id] = sectionTimers[id] || { total: 0 };
+                    sectionTimers[id].start = Date.now();
+                }
+            } else {
+                flushSectionDwell(id);
+            }
+        });
+    }, { threshold: 0.35 });
+
+    sectionIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) sectionObserver.observe(el);
+    });
+
+    // VisibilityChange pause/resume
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden') {
+            sectionIds.forEach(id => flushSectionDwell(id));
+            flushPhotoDwell();
+        } else if (document.visibilityState === 'visible') {
+            sectionIds.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    const rect = el.getBoundingClientRect();
+                    const inView = rect.top < window.innerHeight * 0.7 && rect.bottom > window.innerHeight * 0.3;
+                    if (inView) {
+                        sectionTimers[id] = sectionTimers[id] || { total: 0 };
+                        sectionTimers[id].start = Date.now();
+                    }
+                }
+            });
+            if (lightboxPopup && lightboxPopup.classList.contains('active')) {
+                lbPhotoStartTime = Date.now();
+            }
+        }
+    });
+
+    // --- WHATSAPP FLOATING BUTTON VISIBILITY ---
     const waFloat = document.getElementById('whatsapp-float');
     if (waFloat && hero) {
         const waObserver = new IntersectionObserver((entries) => {
@@ -891,7 +1161,9 @@ const focusedElementStack = [];
         });
         waObserver.observe(hero);
     }
-    const scrollMilestones = [25, 50, 75, 100];
+
+    // --- SCROLL DEPTH MILESTONES ---
+    const scrollMilestones = [25, 50, 75, 90, 100];
     const firedMilestones = new Set();
     window.addEventListener('scroll', () => {
         const scrollTop = window.scrollY || document.documentElement.scrollTop;
@@ -906,11 +1178,13 @@ const focusedElementStack = [];
         });
     }, { passive: true });
 
-    // --- TIME ON PAGE TRACKING ---
-    const timeCheckpoints = [30, 60, 120];
+    // --- ENGAGED TIME CHECKPOINTS ---
+    const timeCheckpoints = [30, 60, 120, 300];
     timeCheckpoints.forEach(seconds => {
         setTimeout(() => {
-            trackEvent('engaged_time', { seconds: seconds });
+            if (document.visibilityState === 'visible') {
+                trackEvent('engaged_time', { seconds: seconds });
+            }
         }, seconds * 1000);
     });
 
