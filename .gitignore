@@ -1,8 +1,17 @@
+# Dependencies & Runtime
+node_modules/
+.wrangler/
+.env
+.env.*
+
 # graft's local graph cache — regenerable, not committed (run `graft build`).
 graft/
 
+# Documentation / Markdown
+*.md
+
 # Exclude high-resolution JPG source files from deployment
-# These are 492 MB of originals that the site never references
+# These are originals that the site never references (uses WebP instead)
 images3/**/*.jpg
 Section2/**/*.jpg
 Section2/**/*.png

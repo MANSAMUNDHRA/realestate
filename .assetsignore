@@ -1,2 +1,25 @@
+node_modules/**
+node_modules
+.git/**
 .git
-.git/COMMIT_EDITMSG .git/config .git/description .git/HEAD .git/hooks .git/index .git/info .git/logs .git/objects .git/ORIG_HEAD .git/refs
+.github/**
+.wrangler/**
+.wrangler
+graft/**
+_backup_photos/**
+images3/**/*.jpg
+images3/**/*.jpeg
+images3/**/*.png
+!images3/image.png
+Section2/**/*.jpg
+Section2/**/*.png
+Logos for Website/*.png
+*.jpeg
+*.md
+package.json
+package-lock.json
+bun.lockb
+bun.lock
+yarn.lock
+pnpm-lock.yaml
+tsconfig.json
