@@ -873,20 +873,6 @@ const focusedElementStack = [];
         });
     });
 
-    // --- WHATSAPP FLOATING BUTTON VISIBILITY ---
-    const waFloat = document.getElementById('whatsapp-float');
-    if (waFloat && hero) {
-        const waObserver = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (!entry.isIntersecting) {
-                    waFloat.classList.add('visible');
-                } else {
-                    waFloat.classList.remove('visible');
-                }
-            });
-        }, { threshold: 0 });
-        waObserver.observe(hero);
-    }
 
     // --- SCROLL DEPTH TRACKING ---
     const scrollMilestones = [25, 50, 75, 100];
