@@ -369,7 +369,26 @@ const focusedElementStack = [];
                 "Brief Message": visitorMessage
             };
 
+            // Setup Google Apps Script (Spreadsheet) payload
+            const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxNIjNnJSyGKGMLjTs8IvBTYym0qJKTDxTpPEl842uWBlQY_nlMecFsjFqFYfBLp15p/exec";
+            const formData = new URLSearchParams();
+            formData.append('Name', visitorName);
+            formData.append('Business', visitorBusiness);
+            formData.append('Phone', visitorPhone);
+            formData.append('City', visitorCity);
+            formData.append('Type', visitorType);
+            formData.append('Rooms', visitorRooms);
+            formData.append('Message', visitorMessage);
+
             try {
+                // Send to Google Spreadsheet (fire and forget)
+                fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    body: formData
+                }).catch(err => console.error("Spreadsheet error:", err));
+
+                // Send to FormSubmit for Email Notification
                 const response = await fetch(`https://formsubmit.co/ajax/${EMAIL_TARGET}`, {
                     method: 'POST',
                     headers: {
